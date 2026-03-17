@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apollo Academy — Architecture Overview (v2)</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: #0f1117;
+        color: #e2e8f0;
+        line-height: 1.6;
+      }
+
+      /* ── Layout ── */
+      .page { max-width: 1300px; margin: 0 auto; padding: 48px 32px; }
+      h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+      .subtitle { color: #94a3b8; font-size: 1rem; margin-bottom: 56px; }
+      h2 { font-size: 1.3rem; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+      h2 .num { background: #395878; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+    flex-shrink: 0; }
+      section { margin-bottom: 64px; }
+
+      /* ── Cards ── */
+      .card {
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 12px;
+        padding: 24px;
+      }
+
+      /* ── System Overview ── */
+      .system-overview {
+        display: grid;
+        grid-template-columns: 1fr 60px 1fr 60px 1fr;
+        gap: 0;
+        align-items: center;
+      }
+      .layer {
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .layer-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 12px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .arrow {
+        text-align: center;
+        font-size: 1.5rem;
+        color: #475569;
+      }
+      .arrow-label { font-size: 0.65rem; color: #64748b; display: block; }
+
+      /* ── Tech badge ── */
+      .badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin: 3px 3px 3px 0;
+      }
+      .badge-blue   { background: #1e3a5f; color: #60a5fa; border: 1px solid #2d5a8e; }
+      .badge-green  { background: #14381f; color: #4ade80; border: 1px solid #166534; }
+      .badge-purple { background: #2d1b54; color: #a78bfa; border: 1px solid #4c1d95; }
+      .badge-orange { background: #3b1f0a; color: #fb923c; border: 1px solid #7c2d12; }
+      .badge-gold   { background: #2d2310; color: #fbbf24; border: 1px solid #78350f; }
+      .badge-teal   { background: #0f2d2a; color: #34d399; border: 1px solid #065f46; }
+      .badge-red    { background: #2d1515; color: #f87171; border: 1px solid #7f1d1d; }
+
+      /* ── Component tree ── */
+      .tree { font-size: 0.85rem; }
+      .tree-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 4px;
+        border-left: 3px solid transparent;
+      }
+      .tree-item:hover { background: #252d3d; }
+      .tree-item.root { border-left-color: #395878; background: #1a2436; }
+      .tree-item.layout { border-left-color: #6366f1; margin-left: 20px; }
+      .tree-item.page { border-left-color: #8b5cf6; margin-left: 40px; }
+      .tree-item.component { border-left-color: #34d399; margin-left: 60px; }
+      .tree-item.data { border-left-color: #f59e0b; margin-left: 80px; }
+      .tree-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+      .tree-name { font-weight: 600; color: #e2e8f0; }
+      .tree-desc { color: #94a3b8; font-size: 0.78rem; margin-top: 2px; }
+
+      /* ── Data flow ── */
+      .flow {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .flow-step {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 16px;
+        align-items: stretch;
+      }
+      .flow-line {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .flow-dot {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 8px;
+      }
+      .flow-connector {
+        width: 2px;
+        flex: 1;
+        min-height: 20px;
+        background: #2d3748;
+        margin: 4px auto;
+      }
+      .flow-content {
+        background: #1e2433;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 8px;
+      }
+      .flow-content-title { font-weight: 700; font-size: 0.9rem; color: #f1f5f9; margin-bottom: 4px; }
+      .flow-content-body { font-size: 0.8rem; color: #94a3b8; }
+      .flow-content-code {
+        background: #0d1117;
+        border: 1px solid #2d3748;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        font-size: 0.75rem;
+        color: #a5f3fc;
+        margin-top: 8px;
+        overflow-x: auto;
+      }
+
+      /* ── Two-col ── */
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+      /* ── Box highlights ── */
+      .highlight-box {
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 12px;
+        font-size: 0.82rem;
+      }
+      .highlight-box .label { font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+      .hl-blue   { background: #0f1e35; border: 1px solid #1e3a5f; }
+      .hl-green  { background: #0a1f14; border: 1px solid #14532d; }
+      .hl-purple { background: #180f2e; border: 1px solid #3b0764; }
+      .hl-orange { background: #1c0f05; border: 1px solid #431407; }
+      .hl-gold   { background: #1c1605; border: 1px solid #451a03; }
+
+      /* ── Module grid ── */
+      .module-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+      .module-card {
+        background: #1a2436;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 14px 10px;
+        text-align: center;
+        font-size: 0.72rem;
+      }
+      .module-card .mod-icon { font-size: 1.4rem; margin-bottom: 6px; }
+      .module-card .mod-title { font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+      .module-card .mod-count { color: #64748b; }
+
+      /* ── Data sources ── */
+      .source-list { list-style: none; }
+      .source-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #1e2433;
+        font-size: 0.82rem;
+      }
+      .source-list li:last-child { border-bottom: none; }
+      .source-type { font-size: 0.65rem; font-weight: 600; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; }
+
+      /* ── State diagram ── */
+      .state-diagram {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        flex-wrap: wrap;
+      }
+      .state-node {
+        background: #1a2436;
+        border: 2px solid #395878;
+        border-radius: 10px;
+        padding: 14px 20px;
+        text-align: center;
+        min-width: 120px;
+      }
+      .state-node.entry { border-color: #34d399; }
+      .state-node.end   { border-color: #f87171; }
+      .state-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 8px;
+        font-size: 0.68rem;
+        color: #64748b;
+        min-width: 80px;
+      }
+      .state-arrow .arrow-line {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 1rem;
+        color: #475569;
+      }
+      .state-node-title { font-weight: 700; font-size: 0.85rem; color: #f1f5f9; }
+      .state-node-sub   { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; }
+
+      /* ── Security section ── */
+      .security-item {
+        display: flex;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid #1e2433;
+        align-items: flex-start;
+      }
+      .security-item:last-child { border-bottom: none; }
+      .security-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+      .security-title { font-weight: 700; font-size: 0.9rem; color: #f1f5f9; margin-bottom: 3px; }
+      .security-desc  { font-size: 0.8rem; color: #94a3b8; }
+
+      /* ── Storage ── */
+      .storage-diagram {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .storage-box {
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+      }
+      .storage-box .s-icon { font-size: 2rem; margin-bottom: 8px; }
+      .storage-box .s-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+      .storage-box .s-desc { font-size: 0.75rem; color: #94a3b8; }
+
+      /* ── Divider ── */
+      .divider { height: 1px; background: #1e2433; margin: 48px 0; }
+
+      /* ── Responsive ── */
+      @media (max-width: 900px) {
+        .system-overview { grid-template-columns: 1fr; }
+        .arrow { transform: rotate(90deg); }
+        .two-col, .three-col { grid-template-columns: 1fr; }
+        .module-grid { grid-template-columns: repeat(3, 1fr); }
+        .storage-diagram { grid-template-columns: 1fr; }
+        .state-diagram { flex-direction: column; }
+      }
+    </style>
+    </head>
+    <body>
+    <div class="page">
+
+      <!-- Header -->
+      <h1>🏛️  Apollo Academy</h1>
+      <p class="subtitle">Architecture deep-dive — how every layer connects, from user interaction to AI-grounded answers · <span style="color:#4ade80;">v2: multi-provider LLM support</span></p>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 1 — SYSTEM OVERVIEW
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">1</span> System Overview</h2>
+        <div class="card">
+          <div class="system-overview">
+
+            <!-- Browser -->
+            <div class="layer">
+              <div class="layer-title badge badge-blue">Browser / Client</div>
+              <div style="font-size:2rem;margin-bottom:10px;">🌐</div>
+              <div style="font-weight:700;margin-bottom:8px;">React SPA</div>
+              <span class="badge badge-blue">React 19</span>
+              <span class="badge badge-purple">React Router 7</span>
+              <span class="badge badge-gold">Vite 6</span>
+              <span class="badge badge-teal">Lucide Icons</span>
+              <div class="highlight-box hl-blue" style="margin-top:14px;">
+                <div class="label" style="color:#60a5fa;">Port</div>
+                localhost:5173
+              </div>
+            </div>
+
+            <!-- Arrow 1 -->
+            <div class="arrow">
+              ⇄
+              <span class="arrow-label">HTTP/JSON</span>
+              <span class="arrow-label">POST /api/chat</span>
+            </div>
+
+            <!-- Backend -->
+            <div class="layer">
+              <div class="layer-title badge badge-green">Backend / API</div>
+              <div style="font-size:2rem;margin-bottom:10px;">⚙️</div>
+              <div style="font-weight:700;margin-bottom:8px;">FastAPI + LangGraph</div>
+              <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:12px;">Agentic RAG server. Receives chat messages, runs a ReAct loop against ChromaDB + Gemini, returns cited answers.</div>
+              <span class="badge badge-green">FastAPI</span>
+              <span class="badge badge-green">Uvicorn</span>
+              <span class="badge badge-purple">LangGraph</span>
+              <span class="badge badge-purple">LangChain</span>
+              <span class="badge badge-blue">langchain-openai</span>
+              <span class="badge badge-orange">langchain-anthropic</span>
+              <div class="highlight-box hl-green" style="margin-top:14px;">
+                <div class="label" style="color:#4ade80;">Port</div>
+                localhost:8000
+              </div>
+            </div>
+
+            <!-- Arrow 2 -->
+            <div class="arrow">
+              ⇄
+              <span class="arrow-label">Embedding</span>
+              <span class="arrow-label">+ LLM calls</span>
+            </div>
+
+            <!-- AI & Storage -->
+            <div class="layer">
+              <div class="layer-title badge badge-orange">AI + Storage</div>
+              <div style="font-size:2rem;margin-bottom:10px;">🤖</div>
+              <div style="font-weight:700;margin-bottom:8px;">Gemini / OpenAI / Anthropic + ChromaDB</div>
+              <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:12px;">Chat LLM is user-selectable (Gemini, OpenAI, Anthropic). Embeddings always use Gemini — the index was built with Gemini vectors.</div>
+              <span class="badge badge-orange">Gemini 2.0 Flash</span>
+              <span class="badge badge-green">GPT-4o</span>
+              <span class="badge badge-purple">Claude Sonnet 4.6</span>
+              <span class="badge badge-orange">Gemini Embeddings</span>
+              <span class="badge badge-teal">ChromaDB</span>
+              <span class="badge badge-red">PyMuPDF</span>
+              <div class="highlight-box hl-orange" style="margin-top:14px;">
+                <div class="label" style="color:#fb923c;">Local</div>
+                backend/chroma_db/
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Key insight -->
+          <div style="margin-top:20px;background:#0d1117;border:1px solid #2d3748;border-radius:8px;padding:16px;font-size:0.82rem;color:#94a3b8;">
+            <strong style="color:#fbbf24;">Key architectural decision:</strong> The frontend is almost entirely self-contained. All curriculum, terms, citations, and sources are static
+    JS data files — no API needed to browse lessons, search, or take quizzes. <strong style="color:#e2e8f0;">Only the Chat page hits the backend.</strong> This means the app is fast,
+    works offline for 12/13 pages, and the backend is only needed for AI-powered Q&A.
+          </div>
+          <div style="margin-top:12px;background:#0a1f14;border:1px solid #14532d;border-radius:8px;padding:16px;font-size:0.82rem;color:#94a3b8;">
+            <strong style="color:#4ade80;">v2 — Multi-provider LLM:</strong> Users can select <strong style="color:#fbbf24;">Google Gemini</strong>, <strong style="color:#4ade80;">OpenAI</strong>, or <strong style="color:#fb923c;">Anthropic</strong> as the chat model and enter their own API key directly in the Chat UI. The key is stored in <code>localStorage</code> only and sent to <code>localhost:8000</code> — never bundled or committed. LangGraph's graph structure is identical for all providers; only the LLM node swaps out.
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 2 — FRONTEND COMPONENT TREE
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">2</span> Frontend Component Tree</h2>
+        <div class="two-col">
+
+          <!-- Left: tree -->
+          <div class="card tree">
+
+            <div class="tree-item root">
+              <span class="tree-icon">⚛️</span>
+              <div><div class="tree-name">main.jsx</div><div class="tree-desc">React 19 entry point — mounts App into #root</div></div>
+            </div>
+
+            <div class="tree-item root" style="margin-left:20px;">
+              <span class="tree-icon">📦</span>
+              <div><div class="tree-name">App.jsx</div><div class="tree-desc">ProgressContext provider + all 13 Routes</div></div>
+            </div>
+
+            <div class="tree-item layout">
+              <span class="tree-icon">🧱</span>
+              <div><div class="tree-name">Layout.jsx</div><div class="tree-desc">Fixed 260px sidebar + Outlet for page content</div></div>
+            </div>
+
+            <div class="tree-item component" style="margin-left:40px;">
+              <span class="tree-icon">🔍</span>
+              <div><div class="tree-name">SearchOverlay.jsx</div><div class="tree-desc">Debounced global search (terms, lessons, sources)</div></div>
+            </div>
+
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">🚀</span>
+              <div><div class="tree-name">StartHere.jsx</div><div class="tree-desc">Landing — progress ring, module cards, CTA</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">📚</span>
+              <div><div class="tree-name">Curriculum.jsx</div><div class="tree-desc">7 modules × lessons browser</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">📖</span>
+              <div><div class="tree-name">LessonView.jsx</div><div class="tree-desc">Lesson content + quiz + citations + next nav</div></div>
+            </div>
+            <div class="tree-item component" style="margin-left:60px;">
+              <span class="tree-icon">❓</span>
+              <div><div class="tree-name">QuizQuestion.jsx</div><div class="tree-desc">MCQ with feedback, correct/incorrect states</div></div>
+            </div>
+            <div class="tree-item component" style="margin-left:60px;">
+              <span class="tree-icon">🔢</span>
+              <div><div class="tree-name">Citations.jsx</div><div class="tree-desc">CitationChip + ExcerptViewer modal (ARIA compliant)</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">💬</span>
+              <div><div class="tree-name">Chat.jsx</div><div class="tree-desc">RAG chat UI — sends to FastAPI, renders markdown safely</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">🧠</span>
+              <div><div class="tree-name">KnowledgeBase.jsx</div><div class="tree-desc">100+ terms, category tabs, search + detail panel</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">📁</span>
+              <div><div class="tree-name">Library.jsx</div><div class="tree-desc">8 source PDFs with sections + metadata</div></div>
+            </div>
+            <div class="tree-item page" style="margin-left:40px;border-left-color:#818cf8;">
+              <span class="tree-icon">🏆</span>
+              <div><div class="tree-name">Profile.jsx</div><div class="tree-desc">Progress dashboard, badges, quiz scores</div></div>
+            </div>
+
+          </div>
+
+          <!-- Right: state management -->
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:#fbbf24;">⚡ State Management</div>
+
+              <div class="highlight-box hl-purple" style="margin-bottom:12px;">
+                <div class="label" style="color:#a78bfa;">ProgressContext (React Context API)</div>
+                Lives in App.jsx, wraps the entire tree. Holds:
+                <ul style="margin-top:8px;margin-left:16px;color:#94a3b8;">
+                  <li><code style="color:#a78bfa;">completedLessons[]</code> — array of lesson IDs</li>
+                  <li><code style="color:#a78bfa;">quizScores{}</code> — lessonId → score map</li>
+                  <li><code style="color:#a78bfa;">badges[]</code> — earned badge IDs</li>
+                </ul>
+              </div>
+
+              <div class="highlight-box hl-gold" style="margin-bottom:12px;">
+                <div class="label" style="color:#fbbf24;">Persistence — localStorage</div>
+                All progress serialized to JSON under key <code style="color:#fbbf24;">apollo-academy-progress</code>. Read on mount with error-safe fallback. Writes wrapped in try/catch (quota protection).
+              </div>
+
+              <div class="highlight-box hl-blue">
+                <div class="label" style="color:#60a5fa;">Local Component State</div>
+                Each page manages its own UI state (selected tab, open modal, search query, quiz answer) via <code style="color:#60a5fa;">useState</code>. No Redux or Zustand needed at this scale.
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:#34d399;">🎨 Design System (index.css)</div>
+              <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">1,163 lines of CSS variables — every component pulls from the same token set.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+                <span style="background:#395878;color:#fff;padding:4px 10px;border-radius:4px;font-size:0.72rem;">--color-primary</span>
+                <span style="background:#818cf8;color:#fff;padding:4px 10px;border-radius:4px;font-size:0.72rem;">AM: indigo</span>
+                <span style="background:#34d399;color:#000;padding:4px 10px;border-radius:4px;font-size:0.72rem;">RS: teal</span>
+                <span style="background:#fb923c;color:#fff;padding:4px 10px;border-radius:4px;font-size:0.72rem;">PI: orange</span>
+              </div>
+              <div style="font-size:0.78rem;color:#64748b;">8-point spacing scale · 7 font sizes · shadow system · glass-morphism cards · fade/slide animations</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 3 — STATIC DATA LAYER
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">3</span> Static Data Layer</h2>
+        <div class="card">
+          <div style="font-size:0.82rem;color:#94a3b8;margin-bottom:20px;">All content lives in <code>src/data/</code> as plain JavaScript. No database, no API calls — just imported modules. This makes the content fast, type-checkable, and easy to update.</div>
+
+          <div class="three-col">
+            <div class="highlight-box hl-purple">
+              <div class="label" style="color:#a78bfa;">📘 curriculum.js</div>
+              <strong>7 modules · 40+ lessons</strong>
+              <div style="color:#94a3b8;font-size:0.78rem;margin-top:6px;">Each lesson has: id, title, objective, estimatedMinutes, keyConcepts[], citations[], content[] (text/keyConcept/formula blocks), checkpoint (MCQ with explanation)</div>
+              <div class="flow-content-code" style="margin-top:10px;">getAllLessons()      // pre-computed
+getLessonById(id)
+getModuleById(id)
+getNextLesson(id)</div>
+            </div>
+            <div class="highlight-box hl-gold">
+              <div class="label" style="color:#fbbf24;">📗 terms.js</div>
+              <strong>27 financial terms</strong>
+              <div style="color:#94a3b8;font-size:0.78rem;margin-top:6px;">Each term has: id, name, type (metric/concept/product), category, definition, optional formula, highlights[], citations[], relatedTerms[], usedInModules[]</div>
+              <div class="flow-content-code" style="margin-top:10px;">searchTerms(query)
+getTermsByCategory(cat)
+categories[]</div>
+            </div>
+            <div class="highlight-box hl-blue">
+              <div class="label" style="color:#60a5fa;">📙 citations.js + sources.js</div>
+              <strong>100+ citation anchors · 8 source docs</strong>
+              <div style="color:#94a3b8;font-size:0.78rem;margin-top:6px;">Citations map id → {document, date, page, lineRange, excerpt}. Sources map id → {filename, type, date, pages, summary, sections[]}</div>
+              <div class="flow-content-code" style="margin-top:10px;">getCitation(id)
+getCitationsBySource(id)
+getSourceById(id)</div>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div style="font-weight:700;font-size:0.85rem;margin-bottom:12px;color:#e2e8f0;">Curriculum Structure</div>
+            <div class="module-grid">
+              <div class="module-card"><div class="mod-icon">🏛️</div><div class="mod-title">Foundations</div><div class="mod-count">~6 lessons · 60 min</div></div>
+              <div class="module-card"><div class="mod-icon">📊</div><div class="mod-title">Asset Management</div><div class="mod-count">~6 lessons · 55 min</div></div>
+              <div class="module-card"><div class="mod-icon">🏦</div><div class="mod-title">Retirement Services</div><div class="mod-count">~5 lessons · 45 min</div></div>
+              <div class="module-card"><div class="mod-icon">💼</div><div class="mod-title">Principal Investing</div><div class="mod-count">~4 lessons · 35 min</div></div>
+              <div class="module-card"><div class="mod-icon">📈</div><div class="mod-title">Financial Performance</div><div class="mod-count">~6 lessons · 55 min</div></div>
+              <div class="module-card"><div class="mod-icon">🧭</div><div class="mod-title">Strategy</div><div class="mod-count">~7 lessons · 60 min</div></div>
+              <div class="module-card"><div class="mod-icon">⚔️</div><div class="mod-title">Competition</div><div class="mod-count">~6 lessons · 50 min</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 4 — RAG CHAT DATA FLOW
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">4</span> RAG Chat — Full Request/Response Flow</h2>
+        <div class="two-col">
+
+          <div class="flow">
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#395878;color:#fff;">1</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">User types a question in Chat.jsx</div>
+                <div class="flow-content-body">Input captured in React state. On submit, the last 20 messages are assembled into the payload (history capped to keep API costs bounded).</div>
+                <div class="flow-content-code">POST /api/chat
+{ messages: [...last 20] }</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#1e3a5f;color:#60a5fa;">2</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">FastAPI validates the request (server.py)</div>
+                <div class="flow-content-body">Pydantic enforces: role must be "user" or "assistant", content ≤ 4,000 chars, 1–50 messages. Invalid requests are rejected with HTTP 422 before any LLM call.</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#2d1b54;color:#a78bfa;">3</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">LangGraph agent invoked (agent.py)</div>
+                <div class="flow-content-body">Messages converted to LangChain format (HumanMessage / AIMessage). System prompt prepended. Graph enters the <strong>agent node</strong>.</div>
+                <div class="flow-content-code">graph.invoke({ messages: lc_messages })</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#3b1f0a;color:#fb923c;">4</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">Selected LLM decides to call search_documents</div>
+                <div class="flow-content-body">The active provider's LLM (Gemini / GPT-4o / Claude, temp=0.1) inspects the question and emits a tool call. The system prompt mandates it ALWAYS searches before answering — this rule applies to all providers.</div>
+                <div class="flow-content-code">search_documents(query="...", k=6)
+# embeddings always use Gemini (index compatibility)</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#0f2d2a;color:#34d399;">5</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">ChromaDB vector search (tools.py)</div>
+                <div class="flow-content-body">Query embedded with Gemini Embeddings. Cosine similarity search returns top-6 chunks with metadata (document name, page, source_type, relevance score).</div>
+                <div class="flow-content-code">[Result 1] (Relevance: 0.87)
+Source: 2026 10-K.pdf (p. 42) [SEC Filing]
+Content: "Apollo's fee-related earnings..."</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#395878;color:#fff;">6</div>
+                <div class="flow-connector"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">Gemini generates a cited answer</div>
+                <div class="flow-content-body">Tool results injected back. Gemini synthesizes a structured response with inline citations in the format <code>[Source: doc.pdf, p. N]</code>.</div>
+              </div>
+            </div>
+
+            <div class="flow-step">
+              <div class="flow-line">
+                <div class="flow-dot" style="background:#2d1515;color:#f87171;">7</div>
+                <div class="flow-connector" style="background:transparent;"></div>
+              </div>
+              <div class="flow-content">
+                <div class="flow-content-title">FastAPI extracts citations + responds</div>
+                <div class="flow-content-body">Regex parses <code>[Source: ...]</code> markers into a structured citations list. Response JSON returned to the browser.</div>
+                <div class="flow-content-code">{ response: "...", citations: [
+  { document, page, excerpt }, ...
+]}</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- LangGraph state machine -->
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div style="font-weight:700;font-size:0.95rem;margin-bottom:18px;color:#a78bfa;">🔄 LangGraph State Machine</div>
+
+              <div class="state-diagram" style="flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="state-node entry">
+                    <div class="state-node-title">START</div>
+                    <div class="state-node-sub">messages injected</div>
+                  </div>
+                  <div class="state-arrow"><div class="arrow-line">→</div></div>
+                  <div class="state-node" style="border-color:#a78bfa;">
+                    <div class="state-node-title">agent_node</div>
+                    <div class="state-node-sub">LLM + bound tools</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;margin-left:180px;gap:4px;">
+                  <div style="font-size:0.7rem;color:#64748b;">has tool_calls?</div>
+                  <div style="font-size:1rem;color:#475569;">↓</div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;margin-left:40px;">
+                  <div class="state-node" style="border-color:#34d399;">
+                    <div class="state-node-title">tools_node</div>
+                    <div class="state-node-sub">ToolNode executes<br>search_documents<br>get_document_list</div>
+                  </div>
+                  <div class="state-arrow">
+                    <div class="arrow-line">↗</div>
+                    <div>loops back</div>
+                  </div>
+                  <div class="state-node end">
+                    <div class="state-node-title">END</div>
+                    <div class="state-node-sub">final AI message</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;font-size:0.78rem;color:#64748b;border-top:1px solid #2d3748;padding-top:12px;">
+                The loop continues until the LLM produces a message with no tool calls — at which point the graph exits to END and the final message is extracted.
+              </div>
+              <div style="margin-top:12px;background:#0a1f14;border:1px solid #14532d;border-radius:6px;padding:12px;font-size:0.78rem;">
+                <div style="font-weight:700;color:#4ade80;margin-bottom:6px;">🔄 Provider-swappable</div>
+                <div style="color:#94a3b8;"><code style="color:#fbbf24;">create_graph(provider, chat_key, google_key)</code> builds the same graph for every provider — only <code>llm_with_tools</code> changes. Tools always use Gemini for embeddings.</div>
+                <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+                  <span class="badge badge-orange">gemini-2.0-flash</span>
+                  <span class="badge badge-green">gpt-4o</span>
+                  <span class="badge badge-purple">claude-sonnet-4-6</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:#fb923c;">📄 Source Documents Indexed</div>
+              <ul class="source-list">
+                <li><span class="source-type" style="background:#1e2d4f;color:#60a5fa;">SEC Filing</span> 2026 10-K Annual Report</li>
+                <li><span class="source-type" style="background:#14381f;color:#4ade80;">Earnings</span> Q4 2025 Earnings Release</li>
+                <li><span class="source-type" style="background:#14381f;color:#4ade80;">Earnings</span> Q4 2025 Earnings Call Transcript</li>
+                <li><span class="source-type" style="background:#2d1b54;color:#a78bfa;">Investor Day</span> 2024 Investor Day Presentation</li>
+                <li><span class="source-type" style="background:#2d1b54;color:#a78bfa;">Investor Day</span> 2024 Investor Day Transcript</li>
+                <li><span class="source-type" style="background:#3b1f0a;color:#fb923c;">Presentation</span> February 2026 Investor Presentation</li>
+                <li><span class="source-type" style="background:#2d2310;color:#fbbf24;">Update</span> Retirement Services Business Update 2025</li>
+                <li><span class="source-type" style="background:#1c1005;color:#f97316;">Research</span> Private Credit: Fact vs. Fiction</li>
+              </ul>
+              <div style="margin-top:12px;font-size:0.75rem;color:#64748b;">~28MB of PDFs → PyMuPDF extraction → RecursiveCharacterTextSplitter (1,000 chars / 200 overlap) → Gemini Embeddings → ChromaDB</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 5 — INGESTION PIPELINE
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">5</span> PDF Ingestion Pipeline (one-time setup)</h2>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+
+            <div style="text-align:center;padding:16px 20px;background:#1a2436;border-radius:8px;min-width:120px;">
+              <div style="font-size:1.8rem;">📄</div>
+              <div style="font-weight:700;font-size:0.85rem;margin-top:6px;">8 PDFs</div>
+              <div style="font-size:0.7rem;color:#64748b;">Sources/ dir</div>
+            </div>
+
+            <div style="padding:0 12px;color:#64748b;font-size:0.75rem;text-align:center;">
+              <div>→</div><div>PyMuPDF</div><div>page extract</div>
+            </div>
+
+            <div style="text-align:center;padding:16px 20px;background:#1a2436;border-radius:8px;min-width:120px;">
+              <div style="font-size:1.8rem;">📝</div>
+              <div style="font-weight:700;font-size:0.85rem;margin-top:6px;">Raw pages</div>
+              <div style="font-size:0.7rem;color:#64748b;">text + metadata</div>
+            </div>
+
+            <div style="padding:0 12px;color:#64748b;font-size:0.75rem;text-align:center;">
+              <div>→</div><div>RecursiveChar</div><div>TextSplitter</div>
+            </div>
+
+            <div style="text-align:center;padding:16px 20px;background:#1a2436;border-radius:8px;min-width:130px;">
+              <div style="font-size:1.8rem;">🧩</div>
+              <div style="font-weight:700;font-size:0.85rem;margin-top:6px;">Chunks</div>
+              <div style="font-size:0.7rem;color:#64748b;">1,000 chars / 200 overlap</div>
+            </div>
+
+            <div style="padding:0 12px;color:#64748b;font-size:0.75rem;text-align:center;">
+              <div>→</div><div>Gemini</div><div>Embeddings</div>
+            </div>
+
+            <div style="text-align:center;padding:16px 20px;background:#1a2436;border-radius:8px;min-width:130px;">
+              <div style="font-size:1.8rem;">🔢</div>
+              <div style="font-weight:700;font-size:0.85rem;margin-top:6px;">Vectors</div>
+              <div style="font-size:0.7rem;color:#64748b;">float arrays</div>
+            </div>
+
+            <div style="padding:0 12px;color:#64748b;font-size:0.75rem;text-align:center;">
+              <div>→</div><div>persist</div>
+            </div>
+
+            <div style="text-align:center;padding:16px 20px;background:#1a2436;border-radius:8px;min-width:130px;">
+              <div style="font-size:1.8rem;">🗄️</div>
+              <div style="font-weight:700;font-size:0.85rem;margin-top:6px;">ChromaDB</div>
+              <div style="font-size:0.7rem;color:#64748b;">backend/chroma_db/</div>
+            </div>
+
+          </div>
+
+          <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="highlight-box hl-green">
+              <div class="label" style="color:#4ade80;">Metadata preserved per chunk</div>
+              <code style="color:#94a3b8;font-size:0.78rem;">{ document: "filename.pdf", page: 42, source_type: "SEC Filing" }</code>
+              — attached to every vector, surfaced in search results for citations.
+            </div>
+            <div class="highlight-box hl-orange">
+              <div class="label" style="color:#fb923c;">Re-ingestion behavior</div>
+              Default: skips if ChromaDB already exists. Use <code style="color:#fb923c;">python ingest.py --force</code> to wipe and re-index — useful when adding new source documents.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 6 — STORAGE OVERVIEW
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">6</span> Storage Overview</h2>
+        <div class="card">
+          <div class="storage-diagram">
+            <div class="storage-box" style="background:#0f1e35;border:1px solid #1e3a5f;">
+              <div class="s-icon">🗄️</div>
+              <div class="s-name" style="color:#60a5fa;">ChromaDB</div>
+              <div class="s-desc">Persistent vector store on disk. Holds all embedded PDF chunks with metadata. Used exclusively by the backend RAG tools.</div>
+              <div class="flow-content-code" style="margin-top:10px;text-align:left;">backend/chroma_db/
+  chroma.sqlite3</div>
+            </div>
+            <div class="storage-box" style="background:#1c1605;border:1px solid #451a03;">
+              <div class="s-icon">💾</div>
+              <div class="s-name" style="color:#fbbf24;">localStorage</div>
+              <div class="s-desc">Browser-side persistence for user progress. Stores completed lessons, quiz scores, and earned badges. Survives page refresh, lost on cache clear.</div>
+              <div class="flow-content-code" style="margin-top:10px;text-align:left;">key: apollo-academy-progress
+{ completedLessons: [],
+  quizScores: {},
+  badges: [] }</div>
+            </div>
+            <div class="storage-box" style="background:#0a1f14;border:1px solid #14532d;">
+              <div class="s-icon">📦</div>
+              <div class="s-name" style="color:#4ade80;">JS Module Cache</div>
+              <div class="s-desc">All curriculum, terms, citations, and sources are static JS. Loaded once at import time, pre-computed where needed (getAllLessons). Zero runtime cost after first load.</div>
+              <div class="flow-content-code" style="margin-top:10px;text-align:left;">src/data/
+  curriculum.js
+  terms.js
+  citations.js
+  sources.js</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 7 — SECURITY
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">7</span> Security</h2>
+        <div class="card">
+          <div class="security-item">
+            <div class="security-icon">🛡️</div>
+            <div>
+              <div class="security-title">XSS Prevention — Safe React Renderer</div>
+              <div class="security-desc">Chat messages used to use <code>dangerouslySetInnerHTML</code>. Now Chat.jsx parses markdown (bold, headers, bullets, citation chips) into real React elements via <code>parseInline()</code> + <code>renderContent()</code>. React escapes all text content automatically — no raw HTML injection possible.</div>
+            </div>
+          </div>
+          <div class="security-item">
+            <div class="security-icon">🔑</div>
+            <div>
+              <div class="security-title">API Key Handling — Two Layers</div>
+              <div class="security-desc">
+                <strong>Backend default:</strong> <code>GOOGLE_API_KEY</code> in <code>backend/.env</code> (gitignored) is used when no user key is provided.<br>
+                <strong>User-provided key (v2):</strong> Users enter their own Gemini / OpenAI / Anthropic key in the Chat settings UI. It is stored in <code>localStorage</code> only — never bundled, never committed, never sent anywhere except <code>localhost:8000</code>. A prominent warning in the UI makes clear this is for local use only. The key is transmitted in the HTTPS request body to the local server and used for that request only.
+              </div>
+            </div>
+          </div>
+          <div class="security-item">
+            <div class="security-icon">✅</div>
+            <div>
+              <div class="security-title">Input Validation — Backend</div>
+              <div class="security-desc">Pydantic enforces <code>role: Literal["user", "assistant"]</code>, <code>content: max_length=4000</code>, and <code>messages: 1–50 items</code>. Invalid payloads get HTTP 422 before reaching the LLM — prevents prompt injection via oversized inputs and rejects unknown roles.</div>
+            </div>
+          </div>
+          <div class="security-item">
+            <div class="security-icon">📡</div>
+            <div>
+              <div class="security-title">CORS Policy</div>
+              <div class="security-desc">Backend only allows origins <code>localhost:5173</code>, <code>localhost:5174</code>, and <code>localhost:3000</code>. In production this list should be updated to the deployed frontend domain only.</div>
+            </div>
+          </div>
+          <div class="security-item">
+            <div class="security-icon">💬</div>
+            <div>
+              <div class="security-title">Bounded Chat History</div>
+              <div class="security-desc">Only the last 20 messages are sent to the backend per request. The full conversation is displayed in the UI but the API payload is capped — prevents unbounded token costs and oversized request bodies.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           SECTION 8 — TESTING
+      ══════════════════════════════════════════════ -->
+      <section>
+        <h2><span class="num">8</span> Testing</h2>
+        <div class="two-col">
+          <div class="card">
+            <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:#818cf8;">🧪 Frontend — Vitest (30 tests)</div>
+            <ul style="list-style:none;font-size:0.82rem;">
+              <li style="padding:6px 0;border-bottom:1px solid #1e2433;display:flex;justify-content:space-between;"><span>curriculum.test.js</span><span class="badge badge-green">13 tests</span></li>
+              <li style="padding:6px 0;border-bottom:1px solid #1e2433;display:flex;justify-content:space-between;"><span>terms.test.js</span><span class="badge badge-green">10 tests</span></li>
+              <li style="padding:6px 0;display:flex;justify-content:space-between;"><span>citations.test.js</span><span class="badge badge-green">7 tests</span></li>
+            </ul>
+            <div class="flow-content-code" style="margin-top:12px;">npm test          # run once
+npm run test:watch # watch mode</div>
+          </div>
+          <div class="card">
+            <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:#34d399;">🧪 Backend — Pytest</div>
+            <div style="font-size:0.82rem;color:#94a3b8;margin-bottom:12px;">Validation and unit tests. No ChromaDB or LLM calls needed.</div>
+            <ul style="list-style:none;font-size:0.82rem;">
+              <li style="padding:6px 0;border-bottom:1px solid #1e2433;">ChatMessage role validation (Literal enforcement)</li>
+              <li style="padding:6px 0;border-bottom:1px solid #1e2433;">Content length limits (min 1, max 4,000)</li>
+              <li style="padding:6px 0;border-bottom:1px solid #1e2433;">Messages list bounds (1–50)</li>
+              <li style="padding:6px 0;">Citation regex extraction edge cases</li>
+            </ul>
+            <div class="flow-content-code" style="margin-top:12px;">pytest backend/tests/</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+      <div style="text-align:center;color:#475569;font-size:0.8rem;padding-bottom:32px;">
+        Apollo Academy · React 19 + FastAPI + LangGraph + Gemini 2.0 Flash / GPT-4o / Claude Sonnet + ChromaDB
+      </div>
+
+    </div>
+    </body>
+    </html>
