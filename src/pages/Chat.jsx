@@ -14,9 +14,9 @@ const PROVIDERS = {
         name: 'Google Gemini',
         defaultModel: 'gemini-2.5-pro',
         models: [
-            { value: 'gemini-3', label: 'Gemini 3', description: 'Latest · Most capable' },
-            { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Recommended' },
-            { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast · Cheaper' },
+            { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro', description: 'Preview · Most capable' },
+            { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'GA · Recommended' },
+            { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'GA · Fast · Cheaper' },
         ],
         placeholder: 'AIza...',
         hint: 'aistudio.google.com/app/apikey',
@@ -36,10 +36,10 @@ const PROVIDERS = {
     },
     anthropic: {
         name: 'Anthropic',
-        defaultModel: 'claude-sonnet-4-6-20250514',
+        defaultModel: 'claude-sonnet-4-6',
         models: [
-            { value: 'claude-sonnet-4-6-20250514', label: 'Claude Sonnet 4.6', description: 'Balanced · Recommended' },
-            { value: 'claude-opus-4-6-20250514', label: 'Claude Opus 4.6', description: 'Most capable' },
+            { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', description: 'GA · Recommended' },
+            { value: 'claude-opus-4-6', label: 'Claude Opus 4.6', description: 'GA · Most capable' },
         ],
         placeholder: 'sk-ant-...',
         hint: 'console.anthropic.com/settings/keys',
