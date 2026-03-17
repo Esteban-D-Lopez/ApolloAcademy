@@ -16,8 +16,8 @@ Apollo Academy is a full-stack learning application combining a structured curri
 
 | Area | What's Included |
 |---|---|
-| **Curriculum** | 7 modules · 40+ lessons · ~330 minutes of structured content |
-| **Lessons** | Text, key concept boxes, financial formulas, checkpoint quizzes |
+| **Curriculum** | 7 modules · 17 lessons · ~210 minutes of in-depth content (2,000–3,000 words per lesson) |
+| **Lessons** | Multi-paragraph explanations, worked financial examples, historical context, competitive comparisons, key concept boxes, formulas, checkpoint quizzes |
 | **Knowledge Base** | 27 financial terms with definitions, formulas, and cross-references |
 | **Source Library** | 8 official Apollo documents with section navigation |
 | **AI Chat** | Agentic RAG — searches ChromaDB, cites sources, answers in context |
