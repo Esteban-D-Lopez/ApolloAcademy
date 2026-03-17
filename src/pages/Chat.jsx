@@ -26,8 +26,7 @@ const PROVIDERS = {
         name: 'OpenAI',
         defaultModel: 'gpt-5',
         models: [
-            { value: 'gpt-5', label: 'GPT-5', description: 'Latest · Most capable' },
-            { value: 'gpt-4o', label: 'GPT-4o', description: 'Previous gen' },
+            { value: 'gpt-5', label: 'GPT-5', description: 'Recommended' },
             { value: 'gpt-5-mini', label: 'GPT-5 Mini', description: 'Fast · Cheaper' },
         ],
         placeholder: 'sk-...',

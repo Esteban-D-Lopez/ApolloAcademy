@@ -46,7 +46,7 @@ PROVIDER_AVAILABLE_MODELS = {
     # gemini-3.1-pro-preview is the official preview ID; gemini-3 is not a valid API string
     "gemini": ["gemini-3.1-pro-preview", "gemini-2.5-pro", "gemini-2.5-flash"],
     # gpt-5 / gpt-5-mini: verify exact IDs at platform.openai.com/docs/models
-    "openai": ["gpt-5", "gpt-4o", "gpt-5-mini"],
+    "openai": ["gpt-5", "gpt-5-mini"],
     # confirmed from docs.anthropic.com/en/docs/about-claude/models — no date suffix
     "anthropic": ["claude-sonnet-4-6", "claude-opus-4-6"],
 }
