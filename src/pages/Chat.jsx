@@ -36,10 +36,10 @@ const PROVIDERS = {
     },
     anthropic: {
         name: 'Anthropic',
-        defaultModel: 'claude-sonnet-4-6',
+        defaultModel: 'claude-sonnet-4-6-20250514',
         models: [
-            { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', description: 'Balanced · Recommended' },
-            { value: 'claude-opus-4-6', label: 'Claude Opus 4.6', description: 'Most capable' },
+            { value: 'claude-sonnet-4-6-20250514', label: 'Claude Sonnet 4.6', description: 'Balanced · Recommended' },
+            { value: 'claude-opus-4-6-20250514', label: 'Claude Opus 4.6', description: 'Most capable' },
         ],
         placeholder: 'sk-ant-...',
         hint: 'console.anthropic.com/settings/keys',

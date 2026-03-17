@@ -38,14 +38,14 @@ EMBEDDING_MODEL = "models/embedding-001"
 PROVIDER_MODELS = {
     "gemini": "gemini-2.5-pro",
     "openai": "gpt-5",
-    "anthropic": "claude-sonnet-4-6",
+    "anthropic": "claude-sonnet-4-6-20250514",
 }
 
 # All supported models per provider (used for validation)
 PROVIDER_AVAILABLE_MODELS = {
     "gemini": ["gemini-3", "gemini-2.5-pro", "gemini-2.5-flash"],
     "openai": ["gpt-5", "gpt-4o", "gpt-5-mini"],
-    "anthropic": ["claude-sonnet-4-6", "claude-opus-4-6"],
+    "anthropic": ["claude-sonnet-4-6-20250514", "claude-opus-4-6-20250514"],
 }
 
 # Retrieval

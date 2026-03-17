@@ -32,16 +32,30 @@ class AgentState(TypedDict):
 SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "system_prompt.txt").read_text()
 
 
+# Models that do not accept a temperature parameter (reasoning/RL-trained models)
+_NO_TEMPERATURE_MODELS = {"gpt-5", "o1", "o1-mini", "o3", "o3-mini", "o4-mini"}
+
+
 # --- LLM factory ---
 
 def _get_llm(provider: str, api_key: str, model: str):
     """Instantiate the appropriate LangChain chat model for the given provider."""
+    use_temp = model not in _NO_TEMPERATURE_MODELS
     if provider == "gemini":
-        return ChatGoogleGenerativeAI(model=model, google_api_key=api_key, temperature=0.1)
+        kwargs = dict(model=model, google_api_key=api_key)
+        if use_temp:
+            kwargs["temperature"] = 0.1
+        return ChatGoogleGenerativeAI(**kwargs)
     if provider == "openai":
-        return ChatOpenAI(model=model, api_key=api_key, temperature=0.1)
+        kwargs = dict(model=model, api_key=api_key)
+        if use_temp:
+            kwargs["temperature"] = 0.1
+        return ChatOpenAI(**kwargs)
     if provider == "anthropic":
-        return ChatAnthropic(model=model, api_key=api_key, temperature=0.1)
+        kwargs = dict(model=model, api_key=api_key)
+        if use_temp:
+            kwargs["temperature"] = 0.1
+        return ChatAnthropic(**kwargs)
     raise ValueError(f"Unknown provider: {provider!r}")
 
 
