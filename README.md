@@ -90,7 +90,8 @@ Apollo Academy is a full-stack learning application combining a structured curri
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- A Gemini API key — [get one free at aistudio.google.com](https://aistudio.google.com/app/apikey)
+- A Gemini API key (required for embeddings) — [get one free at aistudio.google.com](https://aistudio.google.com/app/apikey)
+- Optionally: an OpenAI or Anthropic key if you want to use those providers for chat
 
 ### 1 — Clone the repo
 
@@ -106,7 +107,9 @@ cd backend
 
 # Create your .env from the template
 cp .env.example .env
-# Open .env and add your GOOGLE_API_KEY
+# Open .env and add your GOOGLE_API_KEY (required for embeddings)
+# Optionally add OPENAI_API_KEY or ANTHROPIC_API_KEY as backend defaults
+# (users can also enter their own key directly in the Chat UI)
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -348,7 +351,13 @@ For a visual, interactive breakdown of every layer — open **`architecture.html
 
 ### `backend/.env`
 ```env
+# Required — used for ChromaDB document embeddings regardless of chat provider
 GOOGLE_API_KEY=your_gemini_key_here
+
+# Optional — backend-level defaults for OpenAI / Anthropic chat
+# Users can also supply their own key in the Chat UI (stored in browser only)
+# OPENAI_API_KEY=your_openai_key_here
+# ANTHROPIC_API_KEY=your_anthropic_key_here
 ```
 
 ### `.env.local` (frontend, for local dev)
