@@ -36,16 +36,16 @@ EMBEDDING_MODEL = "models/embedding-001"
 
 # Default chat model per provider
 PROVIDER_MODELS = {
-    "gemini": "gemini-2.0-flash",
-    "openai": "gpt-4o",
+    "gemini": "gemini-2.5-pro",
+    "openai": "gpt-5",
     "anthropic": "claude-sonnet-4-6",
 }
 
 # All supported models per provider (used for validation)
 PROVIDER_AVAILABLE_MODELS = {
-    "gemini": ["gemini-2.0-flash", "gemini-2.0-flash-thinking-exp", "gemini-1.5-pro"],
-    "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
-    "anthropic": ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"],
+    "gemini": ["gemini-3", "gemini-2.5-pro", "gemini-2.5-flash"],
+    "openai": ["gpt-5", "gpt-4o", "gpt-5-mini"],
+    "anthropic": ["claude-sonnet-4-6", "claude-opus-4-6"],
 }
 
 # Retrieval

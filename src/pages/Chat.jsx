@@ -12,11 +12,11 @@ const MAX_API_HISTORY = 20
 const PROVIDERS = {
     gemini: {
         name: 'Google Gemini',
-        defaultModel: 'gemini-2.0-flash',
+        defaultModel: 'gemini-2.5-pro',
         models: [
-            { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', description: 'Fast · Recommended' },
-            { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Flash Thinking', description: 'Reasoning model' },
-            { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', description: 'Longer context' },
+            { value: 'gemini-3', label: 'Gemini 3', description: 'Latest · Most capable' },
+            { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Recommended' },
+            { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Fast · Cheaper' },
         ],
         placeholder: 'AIza...',
         hint: 'aistudio.google.com/app/apikey',
@@ -24,11 +24,11 @@ const PROVIDERS = {
     },
     openai: {
         name: 'OpenAI',
-        defaultModel: 'gpt-4o',
+        defaultModel: 'gpt-5',
         models: [
-            { value: 'gpt-4o', label: 'GPT-4o', description: 'Balanced · Recommended' },
-            { value: 'gpt-4o-mini', label: 'GPT-4o Mini', description: 'Fast · Cheaper' },
-            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: 'Previous gen' },
+            { value: 'gpt-5', label: 'GPT-5', description: 'Latest · Most capable' },
+            { value: 'gpt-4o', label: 'GPT-4o', description: 'Previous gen' },
+            { value: 'gpt-5-mini', label: 'GPT-5 Mini', description: 'Fast · Cheaper' },
         ],
         placeholder: 'sk-...',
         hint: 'platform.openai.com/api-keys',
@@ -40,7 +40,6 @@ const PROVIDERS = {
         models: [
             { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', description: 'Balanced · Recommended' },
             { value: 'claude-opus-4-6', label: 'Claude Opus 4.6', description: 'Most capable' },
-            { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5', description: 'Fast · Cheaper' },
         ],
         placeholder: 'sk-ant-...',
         hint: 'console.anthropic.com/settings/keys',
