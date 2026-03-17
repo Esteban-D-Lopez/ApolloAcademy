@@ -12,27 +12,39 @@ const MAX_API_HISTORY = 20
 const PROVIDERS = {
     gemini: {
         name: 'Google Gemini',
-        model: 'gemini-2.0-flash',
+        defaultModel: 'gemini-2.0-flash',
+        models: [
+            { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', description: 'Fast · Recommended' },
+            { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Flash Thinking', description: 'Reasoning model' },
+            { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', description: 'Longer context' },
+        ],
         placeholder: 'AIza...',
         hint: 'aistudio.google.com/app/apikey',
         color: '#fbbf24',
-        note: null,
     },
     openai: {
         name: 'OpenAI',
-        model: 'gpt-4o',
+        defaultModel: 'gpt-4o',
+        models: [
+            { value: 'gpt-4o', label: 'GPT-4o', description: 'Balanced · Recommended' },
+            { value: 'gpt-4o-mini', label: 'GPT-4o Mini', description: 'Fast · Cheaper' },
+            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', description: 'Previous gen' },
+        ],
         placeholder: 'sk-...',
         hint: 'platform.openai.com/api-keys',
         color: '#4ade80',
-        note: 'Document search still uses the Gemini key set in backend/.env',
     },
     anthropic: {
         name: 'Anthropic',
-        model: 'claude-sonnet-4-6',
+        defaultModel: 'claude-sonnet-4-6',
+        models: [
+            { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6', description: 'Balanced · Recommended' },
+            { value: 'claude-opus-4-6', label: 'Claude Opus 4.6', description: 'Most capable' },
+            { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5', description: 'Fast · Cheaper' },
+        ],
         placeholder: 'sk-ant-...',
         hint: 'console.anthropic.com/settings/keys',
         color: '#fb923c',
-        note: 'Document search still uses the Gemini key set in backend/.env',
     },
 }
 
@@ -56,20 +68,34 @@ export default function Chat() {
 
     // Settings state
     const [provider, setProvider] = useState(() => loadSetting('apollo-llm-provider', 'gemini'))
+    const [model, setModel] = useState(() => loadSetting('apollo-llm-model', ''))
     const [apiKey, setApiKey] = useState(() => loadSetting('apollo-llm-key', ''))
     const [draftProvider, setDraftProvider] = useState(() => loadSetting('apollo-llm-provider', 'gemini'))
+    const [draftModel, setDraftModel] = useState(() => loadSetting('apollo-llm-model', ''))
     const [draftKey, setDraftKey] = useState(() => loadSetting('apollo-llm-key', ''))
     const [showKey, setShowKey] = useState(false)
     const [settingsOpen, setSettingsOpen] = useState(() => !loadSetting('apollo-llm-key', ''))
     const [savedFlash, setSavedFlash] = useState(false)
+
+    // Which providers have a key configured server-side in backend/.env
+    const [serverProviders, setServerProviders] = useState({})
+
+    useEffect(() => {
+        fetch(`${API_URL}/api/providers`)
+            .then(r => r.json())
+            .then(setServerProviders)
+            .catch(() => {}) // backend not running — silently ignore
+    }, [])
 
     useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
     useEffect(() => { inputRef.current?.focus() }, [])
 
     function saveSettings() {
         setProvider(draftProvider)
+        setModel(draftModel)
         setApiKey(draftKey)
         saveSetting('apollo-llm-provider', draftProvider)
+        saveSetting('apollo-llm-model', draftModel)
         saveSetting('apollo-llm-key', draftKey)
         setSettingsOpen(false)
         setSavedFlash(true)
@@ -78,10 +104,13 @@ export default function Chat() {
 
     function clearSettings() {
         setDraftKey('')
+        setDraftModel('')
         setDraftProvider('gemini')
         setProvider('gemini')
+        setModel('')
         setApiKey('')
         saveSetting('apollo-llm-provider', null)
+        saveSetting('apollo-llm-model', null)
         saveSetting('apollo-llm-key', null)
     }
 
@@ -99,6 +128,7 @@ export default function Chat() {
         try {
             const apiMessages = newMessages.slice(-MAX_API_HISTORY)
             const body = { messages: apiMessages, provider }
+            if (model) body.model = model
             if (apiKey) body.api_key = apiKey
 
             const res = await fetch(`${API_URL}/api/chat`, {
@@ -183,6 +213,9 @@ export default function Chat() {
 
     const activeProvider = PROVIDERS[provider]
     const hasKey = !!apiKey
+    const hasServerKey = !!(serverProviders[provider]?.configured)
+    const isReady = hasKey || hasServerKey
+    const activeModel = model || activeProvider.defaultModel
 
     return (
         <div className="page-container" style={{ maxWidth: 900, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 40px)' }}>
@@ -226,15 +259,16 @@ export default function Chat() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>
                         <Key size={15} style={{ color: 'var(--color-primary)' }} />
                         API Settings
-                        {hasKey ? (
+                        {isReady ? (
                             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--font-size-xs)', color: '#4ade80', fontWeight: 500 }}>
                                 <CheckCircle size={12} />
-                                {activeProvider.name} · {activeProvider.model}
+                                {activeProvider.name} · {activeModel}
+                                {hasKey ? ' · Browser key' : ' · Server key'}
                                 {savedFlash && ' · Saved'}
                             </span>
                         ) : (
-                            <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', fontWeight: 400 }}>
-                                Using backend default — or enter your own key below
+                            <span style={{ fontSize: 'var(--font-size-xs)', color: '#fbbf24', fontWeight: 400 }}>
+                                No key configured — expand to add one
                             </span>
                         )}
                     </div>
@@ -292,8 +326,46 @@ export default function Chat() {
                                     >
                                         <div>{p.name}</div>
                                         <div style={{ opacity: 0.7, fontSize: '0.65rem', marginTop: 2 }}>{p.model}</div>
+                                        {serverProviders[key]?.configured && (
+                                            <div style={{ fontSize: '0.6rem', marginTop: 3, color: '#4ade80', opacity: 0.9 }}>
+                                                ✓ server key
+                                            </div>
+                                        )}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Model picker */}
+                        <div style={{ marginTop: 'var(--space-3)' }}>
+                            <label style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--space-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                Model
+                            </label>
+                            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                                {PROVIDERS[draftProvider].models.map(m => {
+                                    const isSelected = (draftModel || PROVIDERS[draftProvider].defaultModel) === m.value
+                                    return (
+                                        <button
+                                            key={m.value}
+                                            onClick={() => setDraftModel(m.value)}
+                                            style={{
+                                                padding: 'var(--space-2) var(--space-3)',
+                                                borderRadius: 'var(--radius-md)',
+                                                border: `1px solid ${isSelected ? PROVIDERS[draftProvider].color : 'var(--color-border)'}`,
+                                                background: isSelected ? `${PROVIDERS[draftProvider].color}12` : 'transparent',
+                                                color: isSelected ? PROVIDERS[draftProvider].color : 'var(--color-text-secondary)',
+                                                cursor: 'pointer',
+                                                fontSize: 'var(--font-size-xs)',
+                                                fontWeight: isSelected ? 700 : 400,
+                                                textAlign: 'left',
+                                                transition: 'all 0.15s',
+                                            }}
+                                        >
+                                            <div>{m.label}</div>
+                                            <div style={{ opacity: 0.6, fontSize: '0.65rem', marginTop: 1 }}>{m.description}</div>
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
 
@@ -301,6 +373,11 @@ export default function Chat() {
                         <div style={{ marginTop: 'var(--space-3)' }}>
                             <label style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--space-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                 {PROVIDERS[draftProvider].name} API Key
+                                {serverProviders[draftProvider]?.configured && (
+                                    <span style={{ marginLeft: 8, color: '#4ade80', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
+                                        — server key active (browser key optional)
+                                    </span>
+                                )}
                             </label>
                             <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--color-bg-elevated, #0d1117)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0 var(--space-3)' }}>
@@ -308,7 +385,7 @@ export default function Chat() {
                                         type={showKey ? 'text' : 'password'}
                                         value={draftKey}
                                         onChange={e => setDraftKey(e.target.value)}
-                                        placeholder={PROVIDERS[draftProvider].placeholder}
+                                        placeholder={serverProviders[draftProvider]?.configured ? 'Leave blank to use server key' : PROVIDERS[draftProvider].placeholder}
                                         autoComplete="off"
                                         spellCheck={false}
                                         style={{
@@ -339,10 +416,12 @@ export default function Chat() {
                                     </button>
                                 )}
                             </div>
-                            <div style={{ marginTop: 'var(--space-1)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                                Get your key at{' '}
-                                <span style={{ color: 'var(--color-primary)' }}>{PROVIDERS[draftProvider].hint}</span>
-                            </div>
+                            {!serverProviders[draftProvider]?.configured && (
+                                <div style={{ marginTop: 'var(--space-1)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                                    Get your key at{' '}
+                                    <span style={{ color: 'var(--color-primary)' }}>{PROVIDERS[draftProvider].hint}</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Non-Gemini embedding note */}

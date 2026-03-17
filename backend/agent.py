@@ -16,7 +16,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-from config import PROVIDER_MODELS
+
 from tools import make_tools
 
 
@@ -34,9 +34,8 @@ SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "system_prompt.txt").read_t
 
 # --- LLM factory ---
 
-def _get_llm(provider: str, api_key: str):
+def _get_llm(provider: str, api_key: str, model: str):
     """Instantiate the appropriate LangChain chat model for the given provider."""
-    model = PROVIDER_MODELS[provider]
     if provider == "gemini":
         return ChatGoogleGenerativeAI(model=model, google_api_key=api_key, temperature=0.1)
     if provider == "openai":
@@ -48,16 +47,17 @@ def _get_llm(provider: str, api_key: str):
 
 # --- Graph factory ---
 
-def create_graph(provider: str, chat_api_key: str, google_api_key: str):
-    """Compile a LangGraph ReAct agent for the given provider and API keys.
+def create_graph(provider: str, chat_api_key: str, google_api_key: str, model: str):
+    """Compile a LangGraph ReAct agent for the given provider, keys, and model.
 
     Args:
         provider:       "gemini" | "openai" | "anthropic"
         chat_api_key:   Key used for the chat/generation LLM.
         google_api_key: Key used for Gemini embeddings (ChromaDB search).
                         Always required because the index was built with Gemini vectors.
+        model:          The specific model ID to use for this provider.
     """
-    llm = _get_llm(provider, chat_api_key)
+    llm = _get_llm(provider, chat_api_key, model)
     tools = make_tools(google_api_key)
     llm_with_tools = llm.bind_tools(tools)
     tool_node = ToolNode(tools)

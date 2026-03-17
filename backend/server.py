@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage, AIMessage
 
 from agent import create_graph
-from config import GOOGLE_API_KEY
+from config import GOOGLE_API_KEY, PROVIDER_KEYS, PROVIDER_MODELS, PROVIDER_AVAILABLE_MODELS
 
 # --- Pydantic Models ---
 
@@ -24,9 +24,10 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., min_length=1, max_length=50)
-    # Provider and key are optional — fall back to .env values when absent
     provider: Literal["gemini", "openai", "anthropic"] = "gemini"
     api_key: str | None = Field(default=None, max_length=200)
+    # Optional model override — defaults to provider's default if not supplied
+    model: str | None = Field(default=None, max_length=100)
 
 
 class Citation(BaseModel):
@@ -78,17 +79,29 @@ async def health():
     return {"status": "ok", "service": "Apollo Academy RAG"}
 
 
+@app.get("/api/providers")
+async def providers():
+    """Return which providers have a server-side key configured, plus their available models."""
+    return {
+        p: {
+            "configured": bool(PROVIDER_KEYS[p]),
+            "models": PROVIDER_AVAILABLE_MODELS[p],
+            "default_model": PROVIDER_MODELS[p],
+        }
+        for p in PROVIDER_KEYS
+    }
+
+
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Send a message to the RAG agent and get a cited response.
 
-    Key resolution order:
-      1. api_key from request body  (user-provided via the Chat UI)
-      2. GOOGLE_API_KEY from backend/.env  (owner's fallback)
+    Key resolution order (chat LLM):
+      1. api_key from request body  (user entered in the Chat UI)
+      2. matching provider key from backend/.env  (e.g. OPENAI_API_KEY for openai)
 
-    For non-Gemini providers the chat LLM uses the user's key while
-    document search embeddings always use the Gemini key from .env
-    (because the ChromaDB index was built with Gemini vectors).
+    Document search embeddings always use GOOGLE_API_KEY from .env
+    because the ChromaDB index was built with Gemini vectors.
     """
     try:
         lc_messages = []
@@ -101,24 +114,27 @@ async def chat(request: ChatRequest):
         if not lc_messages:
             raise HTTPException(status_code=400, detail="No messages provided")
 
-        # Determine which keys to use
-        chat_key = request.api_key or GOOGLE_API_KEY
-        # Embeddings always use Gemini; for OpenAI/Anthropic chat, fall back to .env key
-        google_key = (request.api_key or GOOGLE_API_KEY) if request.provider == "gemini" else GOOGLE_API_KEY
+        # Chat key: user-supplied takes priority, then the server's env key for this provider
+        chat_key = request.api_key or PROVIDER_KEYS.get(request.provider, "")
+        # Embeddings always use the Gemini key regardless of chat provider
+        google_key = GOOGLE_API_KEY
 
-        _placeholder = "your-gemini-api-key-here"
-        if not chat_key or chat_key == _placeholder:
+        if not chat_key:
             raise HTTPException(
                 status_code=400,
-                detail="No API key configured. Add your key in the Chat settings or set GOOGLE_API_KEY in backend/.env.",
+                detail=f"No API key for {request.provider}. Enter your key in the Chat settings or add it to backend/.env.",
             )
-        if not google_key or google_key == _placeholder:
+        if not google_key:
             raise HTTPException(
                 status_code=400,
                 detail="Document search requires a Gemini API key. Set GOOGLE_API_KEY in backend/.env.",
             )
 
-        graph = create_graph(request.provider, chat_key, google_key)
+        # Resolve model: use requested model if it's valid for the provider, else default
+        allowed = PROVIDER_AVAILABLE_MODELS.get(request.provider, [])
+        model = request.model if request.model in allowed else PROVIDER_MODELS[request.provider]
+
+        graph = create_graph(request.provider, chat_key, google_key, model)
         result = graph.invoke({"messages": lc_messages})
         ai_response = result["messages"][-1].content
         citations = extract_citations(ai_response)
