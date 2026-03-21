@@ -20,7 +20,7 @@ const PROVIDERS = {
         ],
         placeholder: 'AIza...',
         hint: 'aistudio.google.com/app/apikey',
-        color: '#fbbf24',
+        color: '#1A9080',
     },
     openai: {
         name: 'OpenAI',
@@ -31,7 +31,7 @@ const PROVIDERS = {
         ],
         placeholder: 'sk-...',
         hint: 'platform.openai.com/api-keys',
-        color: '#4ade80',
+        color: '#1A9080',
     },
     anthropic: {
         name: 'Anthropic',
@@ -42,7 +42,7 @@ const PROVIDERS = {
         ],
         placeholder: 'sk-ant-...',
         hint: 'console.anthropic.com/settings/keys',
-        color: '#fb923c',
+        color: '#1A9080',
     },
 }
 
@@ -72,7 +72,7 @@ export default function Chat() {
     const [draftModel, setDraftModel] = useState(() => loadSetting('apollo-llm-model', ''))
     const [draftKey, setDraftKey] = useState(() => loadSetting('apollo-llm-key', ''))
     const [showKey, setShowKey] = useState(false)
-    const [settingsOpen, setSettingsOpen] = useState(() => !loadSetting('apollo-llm-key', ''))
+    const [settingsOpen, setSettingsOpen] = useState(false)
     const [savedFlash, setSavedFlash] = useState(false)
 
     // Which providers have a key configured server-side in backend/.env
@@ -170,6 +170,7 @@ export default function Chat() {
         if (!text) return null
         const elements = []
         let listBuffer = []
+        let tableBuffer = []
 
         function flushList() {
             if (listBuffer.length === 0) return
@@ -181,24 +182,68 @@ export default function Chat() {
             listBuffer = []
         }
 
+        function flushTable() {
+            if (tableBuffer.length === 0) return
+            // Drop separator rows (e.g. | :--- | :--- |)
+            const rows = tableBuffer.filter(row => !/^\|[\s:|-]+\|$/.test(row.trim()))
+            elements.push(
+                <div key={`tbl-${elements.length}`} style={{ overflowX: 'auto', margin: '0.8em 0' }}>
+                    <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 'var(--font-size-xs)', lineHeight: 1.5 }}>
+                        <tbody>
+                            {rows.map((row, ri) => {
+                                const cells = row.split('|').slice(1, -1).map(c => c.trim())
+                                const isHeader = ri === 0
+                                return (
+                                    <tr key={ri} style={{ background: isHeader ? 'var(--color-bg-tertiary)' : ri % 2 === 0 ? 'transparent' : 'var(--color-bg-primary)' }}>
+                                        {cells.map((cell, ci) => {
+                                            const Tag = isHeader ? 'th' : 'td'
+                                            return (
+                                                <Tag key={ci} style={{
+                                                    padding: '0.35em 0.75em',
+                                                    textAlign: ci === 0 ? 'left' : 'right',
+                                                    fontWeight: isHeader ? 700 : 400,
+                                                    borderBottom: `1px solid var(--color-border${isHeader ? '' : '-light'})`,
+                                                    borderRight: ci < cells.length - 1 ? '1px solid var(--color-border-light)' : 'none',
+                                                    whiteSpace: ci === 0 ? 'normal' : 'nowrap',
+                                                    color: isHeader ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                                                }}>
+                                                    {parseInline(cell)}
+                                                </Tag>
+                                            )
+                                        })}
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )
+            tableBuffer = []
+        }
+
         text.split('\n').forEach((line, i) => {
-            if (line.startsWith('### ')) {
+            const isTableRow = /^\|.+\|$/.test(line.trim())
+            if (isTableRow) {
                 flushList()
+                tableBuffer.push(line)
+            } else if (line.startsWith('### ')) {
+                flushList(); flushTable()
                 elements.push(<h4 key={i} style={{ margin: '0.8em 0 0.3em', fontSize: 'var(--font-size-md)', fontWeight: 700, color: 'var(--color-text-primary)' }}>{parseInline(line.slice(4))}</h4>)
             } else if (line.startsWith('## ')) {
-                flushList()
+                flushList(); flushTable()
                 elements.push(<h3 key={i} style={{ margin: '1em 0 0.4em', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--color-text-primary)' }}>{parseInline(line.slice(3))}</h3>)
             } else if (/^[•\-] /.test(line)) {
+                flushTable()
                 listBuffer.push(<li key={i} style={{ marginBottom: '0.3em' }}>{parseInline(line.slice(2))}</li>)
             } else if (line.trim() === '') {
-                flushList()
+                flushList(); flushTable()
             } else {
-                flushList()
+                flushList(); flushTable()
                 elements.push(<p key={i} style={{ margin: '0.3em 0' }}>{parseInline(line)}</p>)
             }
         })
 
-        flushList()
+        flushList(); flushTable()
         return <>{elements}</>
     }
 
@@ -258,14 +303,14 @@ export default function Chat() {
                         <Key size={15} style={{ color: 'var(--color-primary)' }} />
                         API Settings
                         {isReady ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--font-size-xs)', color: '#4ade80', fontWeight: 500 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--font-size-xs)', color: '#1A9080', fontWeight: 500 }}>
                                 <CheckCircle size={12} />
                                 {activeProvider.name} · {activeModel}
                                 {hasKey ? ' · Browser key' : ' · Server key'}
                                 {savedFlash && ' · Saved'}
                             </span>
                         ) : (
-                            <span style={{ fontSize: 'var(--font-size-xs)', color: '#fbbf24', fontWeight: 400 }}>
+                            <span style={{ fontSize: 'var(--font-size-xs)', color: '#0F6B5E', fontWeight: 400 }}>
                                 No key configured — expand to add one
                             </span>
                         )}
@@ -284,15 +329,15 @@ export default function Chat() {
                             alignItems: 'flex-start',
                             marginTop: 'var(--space-3)',
                             padding: 'var(--space-3)',
-                            background: 'rgba(251,191,36,0.08)',
-                            border: '1px solid rgba(251,191,36,0.3)',
+                            background: 'rgba(26,144,128,0.07)',
+                            border: '1px solid rgba(26,144,128,0.25)',
                             borderRadius: 'var(--radius-md)',
                             fontSize: 'var(--font-size-xs)',
-                            color: '#fbbf24',
+                            color: '#0F6B5E',
                         }}>
                             <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
                             <div>
-                                <strong>Local use only.</strong> Your key is stored in your browser's localStorage and sent only to <code style={{ background: 'rgba(0,0,0,0.2)', padding: '1px 4px', borderRadius: 3 }}>localhost:8000</code>.
+                                <strong>Local use only.</strong> Your key is stored in your browser's localStorage and sent only to <code style={{ background: 'rgba(26,144,128,0.12)', padding: '1px 4px', borderRadius: 3 }}>localhost:8000</code>.
                                 {' '}Never enter your key if you are running this app on a shared or public server.
                                 {' '}<strong>Never commit your key to git.</strong>
                             </div>
@@ -325,7 +370,7 @@ export default function Chat() {
                                         <div>{p.name}</div>
                                         <div style={{ opacity: 0.7, fontSize: '0.65rem', marginTop: 2 }}>{p.model}</div>
                                         {serverProviders[key]?.configured && (
-                                            <div style={{ fontSize: '0.6rem', marginTop: 3, color: '#4ade80', opacity: 0.9 }}>
+                                            <div style={{ fontSize: '0.6rem', marginTop: 3, color: '#1A9080', opacity: 0.9 }}>
                                                 ✓ server key
                                             </div>
                                         )}
@@ -372,13 +417,13 @@ export default function Chat() {
                             <label style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--space-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                 {PROVIDERS[draftProvider].name} API Key
                                 {serverProviders[draftProvider]?.configured && (
-                                    <span style={{ marginLeft: 8, color: '#4ade80', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
+                                    <span style={{ marginLeft: 8, color: '#1A9080', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
                                         — server key active (browser key optional)
                                     </span>
                                 )}
                             </label>
                             <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--color-bg-elevated, #0d1117)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0 var(--space-3)' }}>
+                                <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'var(--color-bg-tertiary)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0 var(--space-3)' }}>
                                     <input
                                         type={showKey ? 'text' : 'password'}
                                         value={draftKey}
@@ -458,7 +503,7 @@ export default function Chat() {
                         <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-6)' }}>
                             Ask anything about Apollo's business, financials, strategy, or source documents.
                         </p>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', justifyContent: 'center', maxWidth: 700, margin: '0 auto' }}>
                             {suggestedQuestions.map((q, i) => (
                                 <button
                                     key={i}
@@ -468,8 +513,11 @@ export default function Chat() {
                                         padding: 'var(--space-2) var(--space-4)',
                                         borderRadius: 'var(--radius-full)',
                                         border: '1px solid var(--color-border)',
-                                        maxWidth: 380,
-                                        textAlign: 'left',
+                                        maxWidth: 340,
+                                        textAlign: 'center',
+                                        whiteSpace: 'normal',
+                                        wordBreak: 'break-word',
+                                        lineHeight: 1.4,
                                     }}
                                     onClick={() => { setInput(q); inputRef.current?.focus() }}
                                 >

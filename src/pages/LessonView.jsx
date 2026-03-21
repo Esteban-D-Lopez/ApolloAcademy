@@ -117,7 +117,13 @@ export default function LessonView() {
                         case 'text':
                             return (
                                 <div key={i} dangerouslySetInnerHTML={{
-                                    __html: block.body.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>')
+                                    __html: block.body
+                                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                        .replace(/^### (.+)$/gm, '<h4 class="lesson-h4">$1</h4>')
+                                        .replace(/^## (.+)$/gm, '<h3 class="lesson-h3">$1</h3>')
+                                        .replace(/\n(<h[34])/g, '$1')
+                                        .replace(/(<\/h[34]>)\n/g, '$1')
+                                        .replace(/\n/g, '<br/>')
                                 }} style={{ marginBottom: 'var(--space-6)' }} />
                             )
 
@@ -129,7 +135,9 @@ export default function LessonView() {
                                         {block.citations && <CitationList citationIds={block.citations} />}
                                     </div>
                                     <div dangerouslySetInnerHTML={{
-                                        __html: block.body.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>')
+                                        __html: block.body
+                                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                            .replace(/\n/g, '<br/>')
                                     }} style={{ color: 'var(--color-text-secondary)', lineHeight: 1.7 }} />
                                 </div>
                             )

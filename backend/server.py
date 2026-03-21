@@ -136,7 +136,15 @@ async def chat(request: ChatRequest):
 
         graph = create_graph(request.provider, chat_key, google_key, model)
         result = graph.invoke({"messages": lc_messages})
-        ai_response = result["messages"][-1].content
+        raw = result["messages"][-1].content
+        # Anthropic can return content as a list of blocks; normalise to plain string
+        if isinstance(raw, list):
+            ai_response = "".join(
+                block.get("text", "") if isinstance(block, dict) else str(block)
+                for block in raw
+            )
+        else:
+            ai_response = raw
         citations = extract_citations(ai_response)
 
         return ChatResponse(response=ai_response, citations=citations)

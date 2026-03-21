@@ -32,7 +32,7 @@ CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 
 # Embedding model — always Gemini (ChromaDB was indexed with these vectors)
-EMBEDDING_MODEL = "models/embedding-001"
+EMBEDDING_MODEL = "models/gemini-embedding-001"
 
 # Default chat model per provider
 PROVIDER_MODELS = {

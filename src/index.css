@@ -5,28 +5,31 @@
 
 /* === CSS Custom Properties === */
 :root {
-  /* Brand Colors */
-  --color-bg-primary: #FEF8F3;
+  /* Brand Colors — Apollo teal palette */
+  --color-bg-primary: #F5F9F8;
   --color-bg-secondary: #FFFFFF;
-  --color-bg-tertiary: #F0EAE5;
+  --color-bg-tertiary: #EBF3F1;
   --color-bg-card: #FFFFFF;
-  --color-bg-card-hover: #FCF9F6;
+  --color-bg-card-hover: #F0F8F6;
   --color-bg-glass: rgba(255, 255, 255, 0.85);
-  --color-bg-overlay: rgba(57, 88, 120, 0.85);
+  --color-bg-overlay: rgba(26, 144, 128, 0.85);
 
-  --color-gold: #395878;
-  --color-gold-light: #4A6D91;
-  --color-gold-dark: #2A425A;
-  --color-gold-muted: rgba(57, 88, 120, 0.1);
+  /* Primary teal — Apollo brand green */
+  --color-primary: #1A9080;
+  --color-primary-hover: #22A896;
+  --color-gold: #1A9080;
+  --color-gold-light: #22A896;
+  --color-gold-dark: #0F6B5E;
+  --color-gold-muted: rgba(26, 144, 128, 0.1);
 
-  --color-text-primary: #010101;
-  --color-text-secondary: #44413E;
-  --color-text-muted: #55585A;
-  --color-text-accent: #395878;
+  --color-text-primary: #111B1A;
+  --color-text-secondary: #3A4A48;
+  --color-text-muted: #5A6B69;
+  --color-text-accent: #1A9080;
 
-  --color-border: #D9D2CC;
-  --color-border-light: #EBE5DF;
-  --color-border-gold: rgba(57, 88, 120, 0.3);
+  --color-border: #C8D9D6;
+  --color-border-light: #DFF0ED;
+  --color-border-gold: rgba(26, 144, 128, 0.3);
 
   --color-success: #34D399;
   --color-success-bg: rgba(52, 211, 153, 0.1);
@@ -77,8 +80,8 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 4px 20px rgba(57, 88, 120, 0.15);
-  --shadow-glow-strong: 0 8px 30px rgba(57, 88, 120, 0.25);
+  --shadow-glow: 0 4px 20px rgba(26, 144, 128, 0.15);
+  --shadow-glow-strong: 0 8px 30px rgba(26, 144, 128, 0.25);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -802,6 +805,26 @@ h6 {
   font-size: var(--font-size-lg);
   margin: var(--space-8) 0 var(--space-3);
   color: var(--color-text-primary);
+}
+
+/* Heading classes injected via dangerouslySetInnerHTML in lesson text blocks */
+.lesson-h3 {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 1.6em 0 0.5em;
+  letter-spacing: -0.01em;
+  display: block;
+}
+
+.lesson-h4 {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin: 1.2em 0 0.4em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
 }
 
 .lesson-content p {
