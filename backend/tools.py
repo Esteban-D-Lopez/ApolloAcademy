@@ -66,7 +66,7 @@ def make_tools(google_api_key: str) -> list:
                 f"Content: {doc.page_content}\n"
             )
 
-        return "\n---\n".join(formatted)
+        return "\n\n".join(formatted)
 
     @tool
     def get_document_list() -> str:

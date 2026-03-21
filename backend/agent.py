@@ -42,17 +42,17 @@ def _get_llm(provider: str, api_key: str, model: str):
     """Instantiate the appropriate LangChain chat model for the given provider."""
     use_temp = model not in _NO_TEMPERATURE_MODELS
     if provider == "gemini":
-        kwargs = dict(model=model, google_api_key=api_key)
+        kwargs = dict(model=model, google_api_key=api_key, max_output_tokens=1024)
         if use_temp:
             kwargs["temperature"] = 0.1
         return ChatGoogleGenerativeAI(**kwargs)
     if provider == "openai":
-        kwargs = dict(model=model, api_key=api_key)
+        kwargs = dict(model=model, api_key=api_key, max_tokens=1024)
         if use_temp:
             kwargs["temperature"] = 0.1
         return ChatOpenAI(**kwargs)
     if provider == "anthropic":
-        kwargs = dict(model=model, api_key=api_key)
+        kwargs = dict(model=model, api_key=api_key, max_tokens=1024)
         if use_temp:
             kwargs["temperature"] = 0.1
         return ChatAnthropic(**kwargs)
